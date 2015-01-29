@@ -1,0 +1,18 @@
+[{
+	"id": "debug",
+	"label": "Ouput debugging info in logs",
+	"type": "bool",
+	"default": "false"
+},
+{
+	"id": "shortensw",
+	"label": "Shorten Star Wars titles, Star Wars Episode III -> SW Ep III",
+	"type": "bool",
+	"default": "false"
+},
+{
+	"id": "shortenlotr",
+	"label": "Shorten Lord of the Rings titles, Lord of the Rings -> LotR",
+	"type": "bool",
+	"default": "false"
+}]

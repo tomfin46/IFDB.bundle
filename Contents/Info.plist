@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIdentifier</key>
+	<string>com.plexapp.agents.ifdb</string>
+	<key>PlexAgentAttributionText</key>
+	<string>
+		&lt;a href=&quot;http://www.fanedit.org/ifdb&quot;&gt;The Internet Fanedit Database (IFDB)&lt;/a&gt; is a database of fanedits vetted by the Fanedit.org Academy*. IFDB is intended to provide information about what edits have been made, and allow fans of fanediting a means to review edits that they have seen. Neither IFDB nor its parent site, Fanedit.org, host links or files for fanedits.
+		&lt;br&gt;
+		&lt;br&gt;
+		*Older edits which pre-date Academy approval may not meet the same quality expectations as newer fanedits, but are grandfathered in as they are part of the fanediting history, and in addition to their own entertainment value, help provide context for the evolution of fanediting as an art and educational exercise.
+	</string>
+	<key>PlexFrameworkVersion</key>
+	<string>2</string>
+	<key>PlexPluginClass</key>
+	<string>Agent</string>
+</dict>
+</plist>
