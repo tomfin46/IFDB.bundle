@@ -22,6 +22,8 @@ SHORTEN_TITLES_MAP = {
         ]
     }
 
+VERSION = '1.0.1'
+
 def Start():
     HTTP.CacheTime = CACHE_1WEEK
 
@@ -123,7 +125,7 @@ class IFDBAgent(Agent.Movies):
               title = self.shortenTitle(title)
 
               id = r.xpath('.//div[' + self.getCssSearchAttr("jrContentTitle") + ']/a/@id')[0].replace('jr-listing-title-', '')
-              thumb = self.getStringContentFromXPath(r.xpath('.//div[' + self.getCssSearchAttr("jrListingThumbnail") + ']/a/img/@src'))
+              thumb = self.getStringContentFromXPath(r, './/div[' + self.getCssSearchAttr("jrListingThumbnail") + ']/a/img/@src')
               date = self.getFieldValue(r, 'jrFaneditreleasedate')
           
               found.append({
@@ -140,6 +142,9 @@ class IFDBAgent(Agent.Movies):
   ##############################
 
   def search(self, results, media, lang, manual):
+
+      self.Log("Version of agent: %s", VERSION)
+
       if media.year and int(media.year) > 1900:
           year = media.year
       else:
