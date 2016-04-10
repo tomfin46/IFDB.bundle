@@ -1,16 +1,17 @@
 import re
 
 # URLS
-IFDB_BASE_URL = 'http://www.fanedit.org/ifdb/'
-IFDB_SEARCH_URL = IFDB_BASE_URL + 'jreviews/search-results?keywords=%s'
-IFDB_MOVIE_INFO_URL = IFDB_BASE_URL + 'component/content/article/%s'
+IFDB_BASE_URL = 'http://ifdb.fanedit.org/'
+IFDB_BASE_SEARCH_URL = IFDB_BASE_URL + 'fanedit-search/search-results/'
+IFDB_SEARCH_URL = IFDB_BASE_SEARCH_URL + '?query=%s&scope=title&keywords=%s&order=alpha'
+IFDB_MOVIE_INFO_URL = IFDB_BASE_URL + '?p=%s'
 
 REQUEST_DELAY = 0       # Delay used when requesting HTML, may be good to have to prevent being banned from the site
 INITIAL_SCORE = 100     # Starting value for score before deductions are taken.
 GOOD_SCORE = 98         # Score required to short-circuit matching and stop searching.
 IGNORE_SCORE = 45       # Any score lower than this will be ignored.
 
-SHORTEN_TITLES_MAP = { 
+SHORTEN_TITLES_MAP = {
     'sw': [
         ["Star Wars", "SW"],
         ["Episode", "Ep"]
@@ -22,7 +23,7 @@ SHORTEN_TITLES_MAP = {
         ]
     }
 
-VERSION = '1.0.1'
+VERSION = '1.0.2'
 
 def Start():
     HTTP.CacheTime = CACHE_1WEEK
@@ -45,7 +46,7 @@ class IFDBAgent(Agent.Movies):
   ##### Return result of xpath query as string #####
   def getStringContentFromXPath(self, source, query):
         return source.xpath('string(' + query + ')')
-  
+
   ##### Pull out standard string fieldValue using xpath #####
   def getFieldValue(self, source, fieldName):
       return self.getStringContentFromXPath(source, './/div[' + self.getCssSearchAttr(fieldName) + ']/div[' + self.getCssSearchAttr("jrFieldValue") + ']/a[text()]')
@@ -59,7 +60,7 @@ class IFDBAgent(Agent.Movies):
       for pair in SHORTEN_TITLES_MAP[key]:
           pattern = re.compile(pair[0], re.IGNORECASE)
           title = pattern.sub(pair[1], title)
-      
+
       return title
 
   ##### Check for phrases to shorten in fanedit title (this one is used for the results screen to avoid streams of incomprehensible Star Wars Episode.... entries #####
@@ -84,7 +85,7 @@ class IFDBAgent(Agent.Movies):
   def doSearch(self, url):
       self.Log("###########  Doing Search  ###########")
       self.Log("For Url: %s", url)
-      
+
       # Fetch HTML
       html = HTML.ElementFromURL(url, sleep=REQUEST_DELAY)
       found = []
@@ -97,7 +98,7 @@ class IFDBAgent(Agent.Movies):
           # Cleanest way is to pull out the id from a report review button in the reviews section
           reportBtns = html.xpath('//button[' + self.getCssSearchAttr("jr-report") + ']')
           id = self.getStringContentFromXPath(reportBtns[0], './@data-listing-id')
-          
+
           self.Log("Id found for %s: %s", title, id)
 
           title = self.shortenTitle(title)
@@ -114,7 +115,7 @@ class IFDBAgent(Agent.Movies):
 
       else:
           results = html.xpath('//div[' + self.getCssSearchAttr("jrListItem") + ']')
-      
+
           self.Log("%u results found", len(results))
 
           for r in results:
@@ -127,7 +128,7 @@ class IFDBAgent(Agent.Movies):
               id = r.xpath('.//div[' + self.getCssSearchAttr("jrContentTitle") + ']/a/@id')[0].replace('jr-listing-title-', '')
               thumb = self.getStringContentFromXPath(r, './/div[' + self.getCssSearchAttr("jrListingThumbnail") + ']/a/img/@src')
               date = self.getFieldValue(r, 'jrFaneditreleasedate')
-          
+
               found.append({
                   'id': id,
                   'title': title,
@@ -149,7 +150,7 @@ class IFDBAgent(Agent.Movies):
           year = media.year
       else:
           year = ''
-          
+
       self.Log("Search for: %s", media.name)
 
       # Strip Diacritics from media name
@@ -157,15 +158,15 @@ class IFDBAgent(Agent.Movies):
       if len(stripped_name) == 0:
           stripped_name = media.name
 
-      searchUrl = IFDB_SEARCH_URL % (String.Quote((stripped_name).encode('utf-8'), usePlus=True))
-      
+      searchUrl = IFDB_SEARCH_URL % ('all', String.Quote((stripped_name).encode('utf-8'), usePlus=True))
+
       # Do the Search
       found = self.doSearch(searchUrl)
 
       if len(found) == 0:
             self.Log('No results found for query "%s"%s', stripped_name, year)
             return
-      
+
       info = []
       # For each result calculate Levenshtein Distance from our query
       for f in found:
@@ -200,7 +201,7 @@ class IFDBAgent(Agent.Movies):
             # Title
             title = self.getStringContentFromXPath(html, '//h1[' + self.getCssSearchAttr("contentheading") + ']/span[@itemprop="name"]/text()')
             metadata.title = self.changeTitleIfPrefered(title)
-            
+
             # Rating
             rating = self.getStringContentFromXPath(html, '//span[' + self.getCssSearchAttr("jrRatingValue") + ']/span[text()]')
             metadata.rating = float(rating)
@@ -223,7 +224,7 @@ class IFDBAgent(Agent.Movies):
                 metadata.original_title = ', '.join(orig_titles)
             else:
                 metadata.original_title = original_title
-                
+
             # Genres
             genre = self.getFieldValue(html, 'jrGenre')
             if len(genre) == 0:
@@ -253,7 +254,7 @@ class IFDBAgent(Agent.Movies):
                     metadata.tags.add(type)
             else:
                 metadata.tags.add(fanedit_type)
-            
+
             # Release Date
             metadata.year = int(self.getFieldValue(html, 'jrFaneditreleasedate')[-4:])
 
@@ -262,7 +263,7 @@ class IFDBAgent(Agent.Movies):
 
             # Poster
             poster_url = self.getStringContentFromXPath(html, './/div[' + self.getCssSearchAttr("jrListingMainImage") + ']//img/@src')
-            
+
             if poster_url not in metadata.posters:
                 try:
                     metadata.posters[poster_url] = Proxy.Media(HTTP.Request(poster_url).content)
