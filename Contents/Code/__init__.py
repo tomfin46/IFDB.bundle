@@ -23,7 +23,7 @@ SHORTEN_TITLES_MAP = {
         ]
     }
 
-VERSION = '1.0.2'
+VERSION = '1.0.3'
 
 def Start():
     HTTP.CacheTime = CACHE_1WEEK
@@ -90,14 +90,15 @@ class IFDBAgent(Agent.Movies):
       html = HTML.ElementFromURL(url, sleep=REQUEST_DELAY)
       found = []
 
-      title = self.getStringContentFromXPath(html, '//h1[' + self.getCssSearchAttr("contentheading") + ']/span[@itemprop="name"]/text()')
+      title = self.getStringContentFromXPath(html, '//h1[' + self.getCssSearchAttr("contentheading") + ']/span[@itemprop="headline"]/text()')
       self.Log("Title: %s", title)
 
       if len(title) != 0:
           # This means we got an exact match and have been redirected to the actual fanedit's page so we need to do some ugly stuff to pull out the id so it can be used in update method
-          # Cleanest way is to pull out the id from a report review button in the reviews section
-          reportBtns = html.xpath('//button[' + self.getCssSearchAttr("jr-report") + ']')
-          id = self.getStringContentFromXPath(reportBtns[0], './@data-listing-id')
+          # Cleanest way is to pull out the id from the fanedits compare checkbox button
+          compareBtns = html.xpath('//input[' + self.getCssSearchAttr("jrCheckListing") + ']')
+          pattern = re.compile('listing', re.IGNORECASE)
+          id = pattern.sub('', self.getStringContentFromXPath(compareBtns[0], './@data-listingid'))
 
           self.Log("Id found for %s: %s", title, id)
 
@@ -203,7 +204,9 @@ class IFDBAgent(Agent.Movies):
             metadata.title = self.changeTitleIfPrefered(title)
 
             # Rating
-            rating = self.getStringContentFromXPath(html, '//span[' + self.getCssSearchAttr("jrRatingValue") + ']/span[text()]')
+            rating = self.getStringContentFromXPath(html, '//span[' + self.getCssSearchAttr("jrRatingValue") + ']/span[1]')
+            if rating == '(0)':
+                rating = 0.0
             metadata.rating = float(rating)
 
             # Faneditor Name
@@ -256,10 +259,12 @@ class IFDBAgent(Agent.Movies):
                 metadata.tags.add(fanedit_type)
 
             # Release Date
-            metadata.year = int(self.getFieldValue(html, 'jrFaneditreleasedate')[-4:])
+            year = self.getFieldValue(html, 'jrFaneditreleasedate')
+            pattern = re.compile(r'[^\d]+', re.IGNORECASE)
+            metadata.year = int(pattern.sub('', year))
 
             # Brief Synopsis
-            metadata.summary = self.getStringContentFromXPath(html, './/div[' + self.getCssSearchAttr("jrBriefsynopsis") + ']/div[' + self.getCssSearchAttr("jrFieldValue") + ']/text()')
+            metadata.summary = self.getStringContentFromXPath(html, './/div[' + self.getCssSearchAttr("jrBriefsynopsis") + ']/div[' + self.getCssSearchAttr("jrFieldValue") + ']')
 
             # Poster
             poster_url = self.getStringContentFromXPath(html, './/div[' + self.getCssSearchAttr("jrListingMainImage") + ']//img/@src')
