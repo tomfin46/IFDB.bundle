@@ -1,7 +1,7 @@
 import re
 
 # URLS
-IFDB_BASE_URL = 'http://ifdb.fanedit.org/'
+IFDB_BASE_URL = 'https://ifdb.fanedit.org/'
 IFDB_BASE_SEARCH_URL = IFDB_BASE_URL + 'fanedit-search/search-results/'
 IFDB_SEARCH_URL = IFDB_BASE_SEARCH_URL + '?query=%s&scope=title&keywords=%s&order=alpha'
 IFDB_MOVIE_INFO_URL = IFDB_BASE_URL + '?p=%s'
