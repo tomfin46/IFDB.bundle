@@ -33,7 +33,10 @@ class IFDBAgent(Agent.Movies):
   name = 'Internet Fanedit Database'
   languages = [Locale.Language.English]
   primary_provider = True
-
+  #accepts_from = ['com.plexapp.agents.localmedia', 'com.plexapp.agents.thetvdb']
+  accepts_from = ['com.plexapp.agents.localmedia', 'com.plexapp.agents.themoviedb']
+  #contributes_to = ['com.plexapp.agents.thetvdb']
+  
   ##### If logging pref turned on, output log message #####
   def Log(self, message, *args):
         if Prefs['debug']:
