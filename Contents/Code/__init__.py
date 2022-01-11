@@ -270,7 +270,7 @@ class IFDBAgent(Agent.Movies):
             metadata.summary = self.getStringContentFromXPath(html, './/div[' + self.getCssSearchAttr("jrBriefsynopsis") + ']/div[' + self.getCssSearchAttr("jrFieldValue") + ']')
 
             # Poster
-            poster_url = self.getStringContentFromXPath(html, './/div[' + self.getCssSearchAttr("jrListingMainImage") + ']//img/@src')
+            poster_url = self.getStringContentFromXPath(html, './/div[' + self.getCssSearchAttr("jrListingMainImage") + ']//a/@href')
 
             if poster_url not in metadata.posters:
                 try:
